@@ -2994,19 +2994,23 @@ do
     Library:AddToRegistry(WatermarkInner, {
         BorderColor3 = 'AccentColor';
     });
+    local _tn = Library.NotifyConfig.Transparency or 0
+
     local InnerFrame = Library:Create('Frame', {
         BackgroundColor3 = Color3.new(1, 1, 1);
         BorderSizePixel = 0;
-        Position = UDim2.new(0, 1, 0, 1);
-        Size = UDim2.new(1, -2, 1, -2);
-        ZIndex = 202;
-        Parent = WatermarkInner;
+        BackgroundTransparency = _tn;
+        Position = UDim2.new(0, innerPosX, 0, innerPosY);
+        Size     = UDim2.new(1, innerSizeW, 1, innerSizeH);
+        ZIndex = 102;
+        Parent = NotifyInner;
     });
     local Gradient = Library:Create('UIGradient', {
         Color = ColorSequence.new({
             ColorSequenceKeypoint.new(0, Library:GetDarkerColor(Library.MainColor)),
             ColorSequenceKeypoint.new(1, Library.MainColor),
         });
+        Transparency = NumberSequence.new(_tn);
         Rotation = -90;
         Parent = InnerFrame;
     });
@@ -3429,11 +3433,30 @@ function Library:CreateWindow(...)
         WindowLabel.Text = Title;
     end;
     function Library:SetNotifyTransparency(v)
-    Library.NotifyConfig.Transparency = math.clamp(v or 0, 0, 1);
+    v = math.clamp(v or 0, 0, 1)
+    Library.NotifyConfig.Transparency = v
     for _, gui in next, Library.NotificationArea:GetChildren() do
         if gui:IsA('Frame') then
-            local inner = gui:FindFirstChildOfClass('Frame');
-            if inner then inner.BackgroundTransparency = Library.NotifyConfig.Transparency; end
+            local inner = gui:FindFirstChildOfClass('Frame')
+            if inner then
+                inner.BackgroundTransparency = v
+
+                local innerFrame = inner:FindFirstChildOfClass('Frame')
+                if innerFrame then
+                    innerFrame.BackgroundTransparency = v
+
+                    local gradient = innerFrame:FindFirstChildOfClass('UIGradient')
+                    if gradient then
+                        gradient.Transparency = NumberSequence.new(v)
+                    end
+                end
+            end
+
+            for _, child in ipairs(gui:GetChildren()) do
+                if child:IsA('Frame') and child ~= inner then
+                    child.BackgroundTransparency = v
+                end
+            end
         end
     end
 end
