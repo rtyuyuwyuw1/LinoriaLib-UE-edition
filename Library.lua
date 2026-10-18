@@ -3055,6 +3055,7 @@ local Gradient = Library:Create('UIGradient', {
     });
 
     local KeybindInner = Library:Create('Frame', {
+        Name = 'KeybindInner';
         BackgroundColor3 = Library.MainColor;
         BorderColor3 = Library.OutlineColor;
         BorderMode = Enum.BorderMode.Inset;
@@ -3475,11 +3476,9 @@ function Library:SetKeybindTransparency(v)
 
     Library.KeybindFrame.BackgroundTransparency = 0
 
-    for _, child in ipairs(Library.KeybindFrame:GetChildren()) do
-        if child:IsA('Frame') and child.Name ~= 'KeybindBackdrop' then
-            child.BackgroundTransparency = v
-            break
-        end
+    local inner = Library.KeybindFrame:FindFirstChild('KeybindInner')
+    if inner then
+        inner.BackgroundTransparency = v
     end
 end
 
