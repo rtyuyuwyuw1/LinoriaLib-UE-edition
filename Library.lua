@@ -3181,9 +3181,12 @@ function Library:Notify(Text, Time)
         BackgroundColor3 = 'MainColor';
         BorderColor3 = 'OutlineColor';
     }, true);
+        local _tn = Library.NotifyConfig.Transparency or 0
+
     local InnerFrame = Library:Create('Frame', {
         BackgroundColor3 = Color3.new(1, 1, 1);
         BorderSizePixel = 0;
+        BackgroundTransparency = _tn;
         Position = UDim2.new(0, innerPosX, 0, innerPosY);
         Size     = UDim2.new(1, innerSizeW, 1, innerSizeH);
         ZIndex = 102;
@@ -3194,6 +3197,7 @@ function Library:Notify(Text, Time)
             ColorSequenceKeypoint.new(0, Library:GetDarkerColor(Library.MainColor)),
             ColorSequenceKeypoint.new(1, Library.MainColor),
         });
+        Transparency = NumberSequence.new(_tn);
         Rotation = -90;
         Parent = InnerFrame;
     });
@@ -3459,15 +3463,12 @@ function Library:SetKeybindTransparency(v)
     v = math.clamp(v or 0, 0, 1)
     Library.KeybindTransparency = v
     if not Library.KeybindFrame then return end
+
+    Library.KeybindFrame.BackgroundTransparency = v
+
     local inner = Library.KeybindFrame:FindFirstChildOfClass('Frame')
-    if not inner then return end
-
-    inner.BackgroundTransparency = v
-
-    for _, child in ipairs(inner:GetChildren()) do
-        if child:IsA('Frame') and child.Name ~= 'KeybindContainer' and child.Name ~= 'ColorFrame' then
-            child.BackgroundTransparency = v
-        end
+    if inner then
+        inner.BackgroundTransparency = v
     end
 end
 
