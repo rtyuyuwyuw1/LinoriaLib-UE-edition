@@ -66,27 +66,65 @@ local Library = {
 
 Library.KeyPickerList = {};
 
+Library._blurTarget = { Enabled = false, Size = 0 }
+
+local function AttachBlur()
+    local be = Library.BlurEffect
+    if not be or not be.Parent then
+        if be then be:Destroy() end
+        be = Instance.new("BlurEffect")
+        be.Name = "LinoriaBlur"
+        be.Size = Library._blurTarget.Size
+        be.Enabled = Library._blurTarget.Enabled
+        Library.BlurEffect = be
+    end
+    local cam = workspace.CurrentCamera
+    if cam and be.Parent ~= cam then
+        be.Parent = cam
+    end
+    return be
+end
+
 Library.BlurEffect = Instance.new("BlurEffect")
 Library.BlurEffect.Name = "LinoriaBlur"
 Library.BlurEffect.Size = 0
 Library.BlurEffect.Enabled = false
-pcall(function() Library.BlurEffect.Parent = Lighting end)
+AttachBlur()
+
+function Library:SetBlurState(enabled, size)
+    Library._blurTarget.Enabled = enabled
+    if size ~= nil then
+        Library._blurTarget.Size = size
+    end
+    local be = AttachBlur()
+    be.Enabled = Library._blurTarget.Enabled
+    be.Size = Library._blurTarget.Size
+end
+
+table.insert(Library.Signals, Library.BlurEffect.AncestryChanged:Connect(function(_, parent)
+    if not parent then
+        task.defer(AttachBlur)
+    end
+end))
+
+table.insert(Library.Signals, RunService.Heartbeat:Connect(function()
+    if Library._unloaded then return end
+    local be = AttachBlur()
+    if be.Enabled ~= Library._blurTarget.Enabled then
+        be.Enabled = Library._blurTarget.Enabled
+    end
+    if math.abs(be.Size - Library._blurTarget.Size) > 0.01 then
+        if Library._blurTarget.Size ~= 0 or Library.Toggled then
+            be.Size = Library._blurTarget.Size
+        end
+    end
+end))
 
 function Library:UpdateBlur()
-    if Library.UseBlur then
-        if Library.Toggled then
-            Library.BlurEffect.Enabled = true
-            TweenService:Create(Library.BlurEffect, TweenInfo.new(0.2, Enum.EasingStyle.Linear), {Size = Library.BlurSize}):Play()
-        end
+    if Library.UseBlur and Library.Toggled then
+        Library:SetBlurState(true, Library.BlurSize)
     else
-        local tween = TweenService:Create(Library.BlurEffect, TweenInfo.new(0.2, Enum.EasingStyle.Linear), {Size = 0})
-        tween:Play()
-    
-        task.delay(0.2, function()
-            if not Library.UseBlur then
-                Library.BlurEffect.Enabled = false
-            end
-        end)
+        Library:SetBlurState(false, 0)
     end
 end
 
@@ -584,8 +622,10 @@ function Library:Unload()
         Library.OnUnload()
     end
     
+    Library._unloaded = true
     if Library.BlurEffect then
         Library.BlurEffect:Destroy()
+        Library.BlurEffect = nil
     end
 
     ScreenGui:Destroy()
@@ -3848,17 +3888,7 @@ end
                 CursorOutline:Remove();
             end);
         end;
-        if Library.UseBlur then
-            if Library.Toggled then
-                Library.BlurEffect.Enabled = true
-                Library.BlurEffect.Size = Library.BlurSize
-            else
-                Library.BlurEffect.Size = 0
-                Library.BlurEffect.Enabled = false
-            end
-        else
-            Library.BlurEffect.Size = 0
-            Library.BlurEffect.Enabled = false
+        Library:UpdateBlur()
         end
     end
 
