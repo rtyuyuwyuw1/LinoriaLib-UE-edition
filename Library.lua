@@ -3889,7 +3889,6 @@ end
             end);
         end;
         Library:UpdateBlur()
-        end
     end
 
     Library:GiveSignal(InputService.InputBegan:Connect(function(Input, Processed)
