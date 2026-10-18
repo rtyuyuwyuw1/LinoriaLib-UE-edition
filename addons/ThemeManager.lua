@@ -272,13 +272,14 @@ end
 
 function ThemeManager:CreateGroupBox(tab)
     assert(self.Library, 'Must set ThemeManager.Library first!')
-    return tab:AddLeftGroupbox('Themes')
+    return tab:AddLeftTabbox() 
 end
 
 function ThemeManager:ApplyToTab(tab)
     assert(self.Library, 'Must set ThemeManager.Library first!')
-    local groupbox = self:CreateGroupBox(tab)
-    self:CreateThemeManager(groupbox)
+    local tabbox = self:CreateGroupBox(tab)
+    local themeTab = tabbox:AddTab('Themes')
+    self:CreateThemeManager(themeTab)
 end
 
 function ThemeManager:ApplyToGroupbox(groupbox)
