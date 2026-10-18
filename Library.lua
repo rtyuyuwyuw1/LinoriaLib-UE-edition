@@ -3451,23 +3451,26 @@ function Library:CreateWindow(...)
                     end
                 end
             end
-
-            for _, child in ipairs(gui:GetChildren()) do
-                if child:IsA('Frame') and child ~= inner then
-                    child.BackgroundTransparency = v
-                end
-            end
         end
     end
 end
 
 function Library:SetKeybindTransparency(v)
-    Library.KeybindTransparency = math.clamp(v or 0, 0, 1);
-    if Library.KeybindFrame then
-        local inner = Library.KeybindFrame:FindFirstChildOfClass('Frame');
-        if inner then inner.BackgroundTransparency = Library.KeybindTransparency; end
+    v = math.clamp(v or 0, 0, 1)
+    Library.KeybindTransparency = v
+    if not Library.KeybindFrame then return end
+    local inner = Library.KeybindFrame:FindFirstChildOfClass('Frame')  -- KeybindInner
+    if not inner then return end
+
+    inner.BackgroundTransparency = v
+
+    for _, child in ipairs(inner:GetChildren()) do
+        if child:IsA('Frame') and child.Name ~= 'KeybindContainer' and child.Name ~= 'ColorFrame' then
+            child.BackgroundTransparency = v
+        end
     end
 end
+
     function Window:AddTab(Name)
         local Tab = {
             Groupboxes = {};
