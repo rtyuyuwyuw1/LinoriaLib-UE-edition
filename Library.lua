@@ -3197,7 +3197,7 @@ function Library:Notify(Text, Time)
             ColorSequenceKeypoint.new(0, Library:GetDarkerColor(Library.MainColor)),
             ColorSequenceKeypoint.new(1, Library.MainColor),
         });
-        Transparency = NumberSequence.new(_tn);
+        Transparency = NumberSequence.new(1);
         Rotation = -90;
         Parent = InnerFrame;
     });
