@@ -1363,6 +1363,14 @@ do
 
             local State = KeyPicker:GetState();
 
+            if KeyPicker.SyncToggleState and ParentObj and ParentObj.Type == 'Toggle' and not KeyPicker._syncing then
+        if ParentObj.Value ~= State then
+            KeyPicker._syncing = true
+            ParentObj:SetValue(State)
+            KeyPicker._syncing = false
+        end
+    end
+
             local displayKey = (KeyPicker.Value == 'None') and '...' or KeyPicker.Value
             ContainerLabel.Text = string.format('[%s] %s (%s)', displayKey, Info.Text, KeyPicker.Mode);
             local kbMode = Library.KeybindMode or 'All'
@@ -1402,30 +1410,19 @@ do
         end;
         function KeyPicker:GetState()
     if KeyPicker.Mode == 'Always' then
-        if KeyPicker.SyncToggleState and ParentObj and ParentObj.Type == 'Toggle' then
-            return ParentObj.Value == true;
-        end
         return true;
     elseif KeyPicker.Mode == 'Hold' then
         if KeyPicker.Value == 'None' then
-            if KeyPicker.SyncToggleState and ParentObj then
-                return ParentObj.Value == true;
-            end
             return false;
         end
         local Key = KeyPicker.Value;
-        local held;
         if Key == 'MB1' or Key == 'MB2' or Key == 'Touch' then
-            held = Key == 'MB1' and InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
+            return Key == 'MB1' and InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
                 or Key == 'MB2' and InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2)
                 or Key == 'Touch' and true
         else
-            held = InputService:IsKeyDown(Enum.KeyCode[KeyPicker.Value]);
-        end
-        if KeyPicker.SyncToggleState and ParentObj then
-            return held and ParentObj.Value == true;
-        end
-        return held;
+            return InputService:IsKeyDown(Enum.KeyCode[KeyPicker.Value]);
+        end;
     else
         return KeyPicker.Toggled;
     end;
@@ -2175,11 +2172,13 @@ do
             Toggle:Display();
 
             for _, Addon in next, Toggle.Addons do
-                if Addon.Type == 'KeyPicker' and Addon.SyncToggleState then
-                    Addon.Toggled = Bool
-                    Addon:Update()
-                end
-            end
+    if Addon.Type == 'KeyPicker' and Addon.SyncToggleState then
+        if Addon.Mode == 'Toggle' then
+            Addon.Toggled = Bool
+        end
+        Addon:Update()
+    end
+end
 
             Library:SafeCallback(Toggle.Callback, Toggle.Value);
             Library:SafeCallback(Toggle.Changed, Toggle.Value);
