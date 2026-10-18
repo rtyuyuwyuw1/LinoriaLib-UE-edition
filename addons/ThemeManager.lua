@@ -149,7 +149,7 @@ function ThemeManager:CreateThemeManager(container)
     container:AddLabel('Main color')      :AddColorPicker('MainColor',      { Default = self.Library.MainColor })
     container:AddLabel('Accent color')    :AddColorPicker('AccentColor',    { Default = self.Library.AccentColor })
     container:AddLabel('Outline color')   :AddColorPicker('OutlineColor',   { Default = self.Library.OutlineColor })
-    container:AddLabel('Font color')      :AddColorPicker('FontColor',      { Default = self.Library.FontColor })
+    container:AddLabel('Text color')      :AddColorPicker('FontColor',      { Default = self.Library.FontColor })
 
     local ThemesArray = {}
     for name in next, self.BuiltInThemes do
