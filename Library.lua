@@ -3479,10 +3479,9 @@ function Library:SetKeybindTransparency(v)
     if inner then
         inner.BackgroundTransparency = v
 
-        for _, child in ipairs(inner:GetChildren()) do
-            if child:IsA('Frame') and child.Name ~= 'ColorFrame' then
-                child.BackgroundTransparency = v
-            end
+        local gradient = inner:FindFirstChildOfClass('UIGradient')
+        if gradient then
+            gradient.Transparency = NumberSequence.new(v)
         end
     end
 end
