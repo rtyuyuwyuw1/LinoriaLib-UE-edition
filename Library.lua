@@ -49,7 +49,7 @@ local Library = {
 
     Toggled = false;
     WireframeDrag = true;
-    UseBlur = false;
+    UseBlur = true;
     BlurSize = 15;
 
     KeybindMode = 'All';
@@ -59,7 +59,9 @@ local Library = {
         BarSide   = 'Left';
         PositionX = 0;
         PositionY = 40;
+        Transparency = 0;
     };
+    KeybindTransparency = 0;
 };
 
 Library.KeyPickerList = {};
@@ -1235,8 +1237,7 @@ do
             SyncToggleState = Info.SyncToggleState or false;
         };
         if KeyPicker.SyncToggleState then
-            Info.Modes = { 'Toggle' }
-            Info.Mode = 'Toggle'
+            Info.Modes = Info.Modes or { 'Always', 'Toggle', 'Hold' }
         end
 
         local PickOuter = Library:Create('Frame', {
@@ -1400,25 +1401,35 @@ do
             Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10 + 15, 210), 0, YSize + 23)
         end;
         function KeyPicker:GetState()
-            if KeyPicker.Mode == 'Always' then
-                return true;
-            elseif KeyPicker.Mode == 'Hold' then
-                if KeyPicker.Value == 'None' then
-                    return false;
-                end
-
-                local Key = KeyPicker.Value;
-                if Key == 'MB1' or Key == 'MB2' or Key == 'Touch' then
-                    return Key == 'MB1' and InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
-                        or Key == 'MB2' and InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2)
-                        or Key == 'Touch' and true
-                else
-                    return InputService:IsKeyDown(Enum.KeyCode[KeyPicker.Value]);
-                end;
-            else
-                return KeyPicker.Toggled;
-            end;
-        end;
+    if KeyPicker.Mode == 'Always' then
+        if KeyPicker.SyncToggleState and ParentObj and ParentObj.Type == 'Toggle' then
+            return ParentObj.Value == true;
+        end
+        return true;
+    elseif KeyPicker.Mode == 'Hold' then
+        if KeyPicker.Value == 'None' then
+            if KeyPicker.SyncToggleState and ParentObj then
+                return ParentObj.Value == true;
+            end
+            return false;
+        end
+        local Key = KeyPicker.Value;
+        local held;
+        if Key == 'MB1' or Key == 'MB2' or Key == 'Touch' then
+            held = Key == 'MB1' and InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
+                or Key == 'MB2' and InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2)
+                or Key == 'Touch' and true
+        else
+            held = InputService:IsKeyDown(Enum.KeyCode[KeyPicker.Value]);
+        end
+        if KeyPicker.SyncToggleState and ParentObj then
+            return held and ParentObj.Value == true;
+        end
+        return held;
+    else
+        return KeyPicker.Toggled;
+    end;
+end;
 
         function KeyPicker:SetValue(Data)
             local Key, Mode = Data[1], Data[2];
@@ -3122,6 +3133,7 @@ function Library:Notify(Text, Time)
         ZIndex = 101;
         Parent = NotifyOuter;
     });
+    NotifyInner.BackgroundTransparency = Library.NotifyConfig.Transparency or 0;
     Library:AddToRegistry(NotifyInner, {
         BackgroundColor3 = 'MainColor';
         BorderColor3 = 'OutlineColor';
@@ -3377,6 +3389,23 @@ function Library:CreateWindow(...)
     function Window:SetWindowTitle(Title)
         WindowLabel.Text = Title;
     end;
+    function Library:SetNotifyTransparency(v)
+    Library.NotifyConfig.Transparency = math.clamp(v or 0, 0, 1);
+    for _, gui in next, Library.NotificationArea:GetChildren() do
+        if gui:IsA('Frame') then
+            local inner = gui:FindFirstChildOfClass('Frame');
+            if inner then inner.BackgroundTransparency = Library.NotifyConfig.Transparency; end
+        end
+    end
+end
+
+function Library:SetKeybindTransparency(v)
+    Library.KeybindTransparency = math.clamp(v or 0, 0, 1);
+    if Library.KeybindFrame then
+        local inner = Library.KeybindFrame:FindFirstChildOfClass('Frame');
+        if inner then inner.BackgroundTransparency = Library.KeybindTransparency; end
+    end
+end
     function Window:AddTab(Name)
         local Tab = {
             Groupboxes = {};
