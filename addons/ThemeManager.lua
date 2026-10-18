@@ -159,7 +159,6 @@ function ThemeManager:CreateThemeManager(container)
         return self.BuiltInThemes[a][1] < self.BuiltInThemes[b][1]
     end)
 
-    container:AddDivider()
     container:AddDropdown('ThemeManager_ThemeList', {
         Text = 'Theme list',
         Values = ThemesArray,
@@ -170,19 +169,11 @@ function ThemeManager:CreateThemeManager(container)
         self:ApplyTheme(Options.ThemeManager_ThemeList.Value)
     end)
 
-    container:AddDivider()
+    
     container:AddInput('ThemeManager_CustomThemeName', { Text = 'Custom theme name' })
-    container:AddDropdown('ThemeManager_CustomThemeList', {
-        Text = 'Custom themes',
-        Values = self:ReloadCustomThemes(),
-        AllowNull = true,
-        Default = 1
-    })
 
-    container:AddDivider()
-
-    -- Save Theme
-    container:AddButton('Save Theme', function()
+    -- Create Theme
+    container:AddButton('Create theme', function()
         local name = Options.ThemeManager_CustomThemeName.Value
         if type(name) ~= 'string' or name:gsub(' ', '') == '' then
             return self.Library:Notify('Invalid theme name (empty)', 2)
@@ -195,6 +186,13 @@ function ThemeManager:CreateThemeManager(container)
         Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
         Options.ThemeManager_CustomThemeList:SetValue(name)
     end)
+
+    container:AddDropdown('ThemeManager_CustomThemeList', {
+        Text = 'Custom themes',
+        Values = self:ReloadCustomThemes(),
+        AllowNull = true,
+        Default = 1
+    })
 
     -- Load theme
     container:AddButton('Load theme', function()
