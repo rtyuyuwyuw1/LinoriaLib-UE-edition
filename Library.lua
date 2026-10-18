@@ -3186,7 +3186,7 @@ function Library:Notify(Text, Time)
     local InnerFrame = Library:Create('Frame', {
         BackgroundColor3 = Color3.new(1, 1, 1);
         BorderSizePixel = 0;
-        BackgroundTransparency = _tn;
+        BackgroundTransparency = 1;
         Position = UDim2.new(0, innerPosX, 0, innerPosY);
         Size     = UDim2.new(1, innerSizeW, 1, innerSizeH);
         ZIndex = 102;
