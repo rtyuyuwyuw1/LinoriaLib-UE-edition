@@ -3054,6 +3054,14 @@ local Gradient = Library:Create('UIGradient', {
         ZIndex = 101;
         Parent = KeybindOuter;
     });
+    Library:Create('UIGradient', {
+    Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Library:GetDarkerColor(Library.MainColor)),
+        ColorSequenceKeypoint.new(1, Library.MainColor),
+    });
+    Rotation = -90;
+    Parent = KeybindInner;
+});
     Library:AddToRegistry(KeybindInner, {
         BackgroundColor3 = 'MainColor';
         BorderColor3 = 'OutlineColor';
@@ -3464,11 +3472,18 @@ function Library:SetKeybindTransparency(v)
     v = math.clamp(v or 0, 0, 1)
     Library.KeybindTransparency = v
     if not Library.KeybindFrame then return end
-    Library.KeybindFrame.BackgroundTransparency = 0
+
+    Library.KeybindFrame.BackgroundTransparency = 1
 
     local inner = Library.KeybindFrame:FindFirstChild('KeybindInner')
     if inner then
         inner.BackgroundTransparency = v
+
+        for _, child in ipairs(inner:GetChildren()) do
+            if child:IsA('Frame') and child.Name ~= 'ColorFrame' then
+                child.BackgroundTransparency = v
+            end
+        end
     end
 end
 
