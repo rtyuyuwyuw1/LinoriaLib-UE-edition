@@ -3464,8 +3464,7 @@ function Library:SetKeybindTransparency(v)
     v = math.clamp(v or 0, 0, 1)
     Library.KeybindTransparency = v
     if not Library.KeybindFrame then return end
-
-    Library.KeybindFrame.BackgroundTransparency = v
+    Library.KeybindFrame.BackgroundTransparency = 0
 
     local inner = Library.KeybindFrame:FindFirstChild('KeybindInner')
     if inner then
