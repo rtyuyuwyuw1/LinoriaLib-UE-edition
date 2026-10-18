@@ -3045,6 +3045,15 @@ local Gradient = Library:Create('UIGradient', {
     });
     Library:ApplyGlow(KeybindOuter);
 
+    local KeybindBackdrop = Library:Create('Frame', {
+        BackgroundColor3 = Color3.new(0, 0, 0);
+        BackgroundTransparency = 0;
+        BorderSizePixel = 0;
+        Size = UDim2.new(1, 0, 1, 0);
+        ZIndex = 100;
+        Parent = KeybindOuter;
+    });
+
     local KeybindInner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
         BorderColor3 = Library.OutlineColor;
@@ -3466,9 +3475,11 @@ function Library:SetKeybindTransparency(v)
 
     Library.KeybindFrame.BackgroundTransparency = 0
 
-    local inner = Library.KeybindFrame:FindFirstChildOfClass('Frame')
-    if inner then
-        inner.BackgroundTransparency = v
+    for _, child in ipairs(Library.KeybindFrame:GetChildren()) do
+        if child:IsA('Frame') and child.Name ~= 'KeybindBackdrop' then
+            child.BackgroundTransparency = v
+            break
+        end
     end
 end
 
